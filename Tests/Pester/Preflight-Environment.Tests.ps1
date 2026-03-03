@@ -62,7 +62,7 @@ Describe "COM5411 IaC Environment Preflight (Dual-Shell)" {
 
         # PS7-only modules (won't work in Windows PowerShell 5.1)
         $PS7OnlyPinned = @{
-            PSDesiredStateConfiguration = [version]'2.0.7'
+            PSDesiredStateConfiguration = [version]'2.0.8'
         }
 
         $RequiredUnpinned = @(
@@ -212,7 +212,7 @@ NEXT STEP (do this first, then re-run Preflight):
 
         # PS7-only modules (won't work in Windows PowerShell 5.1)
         $script:PS7OnlyPinned = @{
-            PSDesiredStateConfiguration = [version]'2.0.7'
+            PSDesiredStateConfiguration = [version]'2.0.8'
         }
 
         $script:RequiredUnpinned = @(

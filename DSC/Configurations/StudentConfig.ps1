@@ -42,7 +42,11 @@ This is not paranoia - this is professional discipline.
 #>
 
 Configuration StudentBaseline {
-    param()
+    param(
+        [PSCredential]$DomainAdminCredential,
+        [PSCredential]$DsrmCredential,
+        [PSCredential]$UserCredential
+    )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ComputerManagementDSC

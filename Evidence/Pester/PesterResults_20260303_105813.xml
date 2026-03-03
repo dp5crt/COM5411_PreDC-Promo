@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="3" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-03-03" time="10:58:13">
+  <environment machine-name="BARM-DC-01" user="Administrator" clr-version="9.0.10" os-version="10.0.26100" platform="Microsoft Windows Server 2025 Datacenter|C:\WINDOWS|\Device\Harddisk0\Partition2" nunit-version="2.5.8.0" user-domain="BARM-DC-01" cwd="C:\Dev\repos\COM5411_PreDC-Promo" />
+  <culture-info current-culture="en-GB" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="1.0119" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Dev\repos\COM5411_PreDC-Promo\Tests\Pester\Test-ProofOfLife.Tests.ps1" executed="True" result="Success" success="True" time="1.0119" asserts="0" description="C:\Dev\repos\COM5411_PreDC-Promo\Tests\Pester\Test-ProofOfLife.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Proof-of-Life (DSC created files)" executed="True" result="Success" success="True" time="0.4252" asserts="0" description="Proof-of-Life (DSC created files)">
+            <results>
+              <test-case description="C:\\TEST directory exists" name="Proof-of-Life (DSC created files).C:\\TEST directory exists" time="0.1764" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="C:\\TEST\\test.txt exists" name="Proof-of-Life (DSC created files).C:\\TEST\\test.txt exists" time="0.0292" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="test.txt has expected contents" name="Proof-of-Life (DSC created files).test.txt has expected contents" time="0.1304" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
