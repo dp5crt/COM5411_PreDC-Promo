@@ -55,21 +55,36 @@ Configuration StudentBaseline {
 
     Node $AllNodes.NodeName {
 
-        # Ensure C:\TEST exists
-        File TestFolder {
-            DestinationPath = 'C:\TEST'
-            Type            = 'Directory'
-            Ensure          = 'Present'
+       # Use the Computer resource from the ComputerManagementDSC module to set the computer name and reboot if needed 
+       Computer SetName {
+            Name = $AllNodes.ComputerName
         }
 
-        # Ensure C:\TEST\test.txt exists with content
-        File TestFile {
-            DestinationPath = 'C:\TEST\test.txt'
-            Type            = 'File'
-            Ensure          = 'Present'
-            Contents        = 'Proof-of-life: DSC created this file.'
-            DependsOn       = '[File]TestFolder'
+        # Set the TimeZone
+        TimeZone SetTimeZone {
+            IsSingleInstance = 'Yes'
+            TimeZone = $AllNodes.TimeZone
         }
+
+        Service WindowsTime {
+            Name = 'W32Time'
+            State = 'Running'
+            StartupType = 'Automatic'
+            DependsOn = '[TimeZone]SetTimeZone'
+        }
+
+        WindowsFeature ADDS {
+            Name = 'AD-Domain-Services'
+            Ensure = 'Present'
+        }
+
+        WindowsFeature RSATADDS {
+            Name = 'RSAT-AD-Tools'
+            Ensure = 'Present'
+            DependsOn = '[WindowsFeature]ADDS'
+        }
+
+
 
     }
 }
