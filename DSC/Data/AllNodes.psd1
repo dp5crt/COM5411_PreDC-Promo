@@ -41,17 +41,28 @@ This is not just a rule - this is professional survival.
 @{
     AllNodes = @(
         @{
-            NodeName   = 'localhost'
-            Role       = 'DC'
-            DomainName = 'barmbuzz.local'
+            # --- Identification ---
+            NodeName           = 'localhost'
+            Role               = 'DC'
+            ComputerName       = "BB-DC01"
             
+            # --- Domain Metadata (Fixes your PropertyNotFoundException) ---
+            DomainName         = 'barmbuzz.local'
+            DomainNetBIOSName  = 'BARMBUZZ' 
+            
+            # --- Network Configuration (Matches your ipconfig /all) ---
+            InterfaceAlias_Internal = 'Ethernet 2'
+            InterfaceAlias_NAT      = 'Ethernet'
+            IPv4Address_Internal    = '192.168.99.10'
+            PrefixLength_Internal   = 24
+            DnsServers_Internal     = @('127.0.0.1')
+            Expect_NAT_Dhcp         = $true
+            DisableDnsRegistrationOnNat = $true
 
-            ComputerName = "BB-DC01"
-            TimeZone     = "GMT Standard Time"
-            EnsureW32Time = $true
-
-            InstallADDSRole = $true
-            InstallRSATADDS = $true
+            # --- Automation Flags ---
+            TimeZone           = "GMT Standard Time"
+            InstallADDSRole    = $true
+            InstallRSATADDS    = $true
             
             # SECURITY NOTE: Future credential properties will be added by the orchestrator
             # at runtime, not stored here. Example (YOU DON'T ADD THIS YET):
