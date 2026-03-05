@@ -53,66 +53,60 @@ Configuration StudentBaseline {
     Import-DscResource -ModuleName ActiveDirectoryDSC
     Import-DscResource -ModuleName NetworkingDsc
 
-Node $AllNodes.NodeName {
+    Node $AllNodes.NodeName {
 
-        # Set the computer name
+        # --- Base OS Configuration ---
         Computer SetName {
             Name = $AllNodes.ComputerName
         }
 
-        # Set the TimeZone
         TimeZone SetTimeZone {
             IsSingleInstance = 'Yes'
-            TimeZone = $AllNodes.TimeZone
+            TimeZone         = $AllNodes.TimeZone
         }
 
-        # Ensure Time Service is running
-        Service WindowsTime {
-            Name        = 'W32Time'
-            State       = 'Running'
-            StartupType = 'Automatic'
-            DependsOn   = '[TimeZone]SetTimeZone'
+        # --- Networking Configuration ---
+        # Fixed: Using the correct 'IPAddress' property for the NetworkingDsc module
+        IPAddress InternalStaticIP {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            IPAddress      = $AllNodes.IPv4Address_Internal 
         }
 
-        # Install AD DS Role (Correct Name)
+        DNSServerAddress InternalDNS {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            Address        = $AllNodes.DnsServers_Internal 
+            DependsOn      = '[IPAddress]InternalStaticIP'
+        }
+
+        DnsClient DisableNatRegistration {
+            InterfaceAlias                 = $AllNodes.InterfaceAlias_NAT
+            RegisterThisConnectionsAddress = $false
+        }
+
+        # --- Active Directory Installation ---
         WindowsFeature ADDS {
             Name   = 'AD-Domain-Services'
             Ensure = 'Present'
         }
 
-        # Install RSAT Tools
         WindowsFeature RSATADDS {
             Name      = 'RSAT-AD-Tools'
             Ensure    = 'Present'
             DependsOn = '[WindowsFeature]ADDS'
         }
 
-        # --- NETWORKING LOGIC ---
-
-        # 1. Set Static IP for Internal NIC
-       # 1. Set Static IP for Internal NIC (Ethernet 2)
-        # Fix: Using 'IPAddress' property instead of 'IPv4Address'
-        IPAddress InternalStaticIP {
-            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
-            AddressFamily  = 'IPv4'
-            IPAddress      = $AllNodes.IPv4Address_Internal # Corrected property name
-        }
-
-        # 2. Set DNS for Internal NIC
-        # Fix: Using 'Address' property instead of 'AddressServer'
-        DNSServerAddress InternalDNS {
-            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
-            AddressFamily  = 'IPv4'
-            Address        = $AllNodes.DnsServers_Internal # Corrected property name
-            DependsOn      = '[IPAddress]InternalStaticIP'
-        }
-
-        # 3. Disable DNS Registration on NAT (Ethernet)
-        DnsClient DisableNatRegistration {
-            InterfaceAlias                 = $AllNodes.InterfaceAlias_NAT
-            ConnectionSpecificSuffix           = ''
-            RegisterThisConnectionsAddress = $false
-            DependsOn                      = '[DNSServerAddress]InternalDNS' 
+        # --- NEW: Active Directory Promotion ---
+        # This resource actually promotes the server to a Domain Controller
+        ADDomain BarmBuzzDomain {
+            DomainName                    = $AllNodes.DomainName
+            DomainNetbiosName             = $AllNodes.DomainNetBIOSName
+            DomainMode                    = $AllNodes.DomainMode
+            ForestMode                    = $AllNodes.ForestMode
+            Credential                    = $DomainAdminCredential
+            SafeModeAdministratorPassword = $DsrmCredential
+            DependsOn                     = @('[WindowsFeature]RSATADDS', '[DNSServerAddress]InternalDNS')
         }
     }
 }
