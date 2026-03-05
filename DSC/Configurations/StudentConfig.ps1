@@ -50,13 +50,13 @@ Configuration StudentBaseline {
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ComputerManagementDSC
-    Import-DscResource -ModuleName ActivedirectoryDSC
+    Import-DscResource -ModuleName ActiveDirectoryDSC
     Import-DscResource -ModuleName NetworkingDsc
 
     Node $AllNodes.NodeName {
 
-       # Use the Computer resource from the ComputerManagementDSC module to set the computer name and reboot if needed 
-       Computer SetName {
+        # Use the Computer resource from the ComputerManagementDSC module
+        Computer SetName {
             Name = $AllNodes.ComputerName
         }
 
@@ -74,7 +74,7 @@ Configuration StudentBaseline {
         }
 
         WindowsFeature ADDS {
-            Name = 'AD-Domain-Services'
+            Name = 'RSAT-ADDS'
             Ensure = 'Present'
         }
 
@@ -84,7 +84,9 @@ Configuration StudentBaseline {
             DependsOn = '[WindowsFeature]ADDS'
         }
 
-
-
+        Get-DnsClient DisableNatRegistration {
+            InterfaceAlias = $Node.InterfaceAlias_NAT
+            RegisterThisConnectionsAddress = $false
+     }
     }
 }
