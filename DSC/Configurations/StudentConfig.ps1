@@ -53,9 +53,9 @@ Configuration StudentBaseline {
     Import-DscResource -ModuleName ActiveDirectoryDSC
     Import-DscResource -ModuleName NetworkingDsc
 
-    Node $AllNodes.NodeName {
+Node $AllNodes.NodeName {
 
-        # Use the Computer resource from the ComputerManagementDSC module
+        # Set the computer name
         Computer SetName {
             Name = $AllNodes.ComputerName
         }
@@ -66,27 +66,53 @@ Configuration StudentBaseline {
             TimeZone = $AllNodes.TimeZone
         }
 
+        # Ensure Time Service is running
         Service WindowsTime {
-            Name = 'W32Time'
-            State = 'Running'
+            Name        = 'W32Time'
+            State       = 'Running'
             StartupType = 'Automatic'
-            DependsOn = '[TimeZone]SetTimeZone'
+            DependsOn   = '[TimeZone]SetTimeZone'
         }
 
+        # Install AD DS Role (Correct Name)
         WindowsFeature ADDS {
-            Name = 'RSAT-ADDS'
+            Name   = 'AD-Domain-Services'
             Ensure = 'Present'
         }
 
+        # Install RSAT Tools
         WindowsFeature RSATADDS {
-            Name = 'RSAT-AD-Tools'
-            Ensure = 'Present'
+            Name      = 'RSAT-AD-Tools'
+            Ensure    = 'Present'
             DependsOn = '[WindowsFeature]ADDS'
         }
 
-        Get-DnsClient DisableNatRegistration {
-            InterfaceAlias = $Node.InterfaceAlias_NAT
+        # --- NETWORKING LOGIC ---
+
+        # 1. Set Static IP for Internal NIC
+       # 1. Set Static IP for Internal NIC (Ethernet 2)
+        # Fix: Using 'IPAddress' property instead of 'IPv4Address'
+        IPAddress InternalStaticIP {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            IPAddress      = $AllNodes.IPv4Address_Internal # Corrected property name
+        }
+
+        # 2. Set DNS for Internal NIC
+        # Fix: Using 'Address' property instead of 'AddressServer'
+        DNSServerAddress InternalDNS {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            Address        = $AllNodes.DnsServers_Internal # Corrected property name
+            DependsOn      = '[IPAddress]InternalStaticIP'
+        }
+
+        # 3. Disable DNS Registration on NAT (Ethernet)
+        DnsClient DisableNatRegistration {
+            InterfaceAlias                 = $AllNodes.InterfaceAlias_NAT
+            ConnectionSpecificSuffix           = ''
             RegisterThisConnectionsAddress = $false
-     }
+            DependsOn                      = '[DNSServerAddress]InternalDNS' 
+        }
     }
 }
