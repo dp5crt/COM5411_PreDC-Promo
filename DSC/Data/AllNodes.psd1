@@ -60,6 +60,7 @@ This is not just a rule - this is professional survival.
             IPv4Address_Internal    = '192.168.99.10'
             PrefixLength_Internal   = 24
             DnsServers_Internal     = @('127.0.0.1')
+            DefaultGateway_Internal = $null
 
             #Network Settings - External NIC
             InterfaceAlias_NAT          = 'Ethernet'
@@ -69,6 +70,9 @@ This is not just a rule - this is professional survival.
             # Installation Flags
             InstallADDSRole = $true
             InstallRSATADDS = $true
+
+            PsDscAllowPlainTextPassword = $true  # For lab purposes only - do NOT use in production
+            PsDscAllowDomainUser = $true          # Allow domain user credentials for lab (not recommended in production)
 
             # SECURITY NOTE: Future credential properties will be added by the orchestrator
             # at runtime, not stored here. Example (YOU DON'T ADD THIS YET):

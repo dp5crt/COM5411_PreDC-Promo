@@ -41,6 +41,49 @@ If you accidentally commit a secret:
 This is not paranoia - this is professional discipline.
 #>
 
+<#
+STUDENT TASK:
+- Define Configuration StudentBaseline
+- Use ConfigurationData (AllNodes.psd1)
+- DO NOT hardcode passwords here.
+
+CYBERSECURITY NOTES:
+This is a Security module. Credential handling matters even in labs.
+
+WHY NO HARDCODED CREDENTIALS?
+1. Security Hygiene: Hardcoded credentials in code = security breach waiting to happen
+2. Git History: Once committed, credentials are in your Git history FOREVER (even if you delete them later)
+3. Professional Practice: Real environments use credential vaults (Azure KeyVault, HashiCorp Vault, etc.)
+4. Audit Trail: Your Git commits may be reviewed by employers, peers, or examiners
+
+HOW CREDENTIALS WILL WORK (Later weeks):
+- The orchestrator (Run_BuildMain.ps1) will handle credential creation securely
+- Your configuration receives them as PSCredential objects via parameters
+- Example: Configuration StudentBaseline { param([PSCredential]$DomainCredential) }
+- You reference them in DSC resources without seeing the plaintext password
+- MOFs can be encrypted with certificates (production best practice)
+
+FOR NOW (Week 1):
+- Lab uses FIXED credentials documented in StudentRepoInit.ps1
+- Administrator password: superw1n_user (Windows local admin)
+- User accounts password: notlob2k26 (domain users you create)
+- You may need these for MANUAL tasks, but NEVER put them in this file
+
+THREAT MODEL AWARENESS:
+Even in a lab, practice defense-in-depth:
+- Assume your repo will be cloned by others (it will - it's Git!)
+- Assume your transcripts/logs will be read (they're in Evidence/)
+- Assume your build artifacts will be inspected (they're committed)
+- NEVER commit: passwords, API keys, personal data, PII
+
+If you accidentally commit a secret:
+1. Rotating the secret is the ONLY fix (changing the password)
+2. Deleting the file or "fixing" the commit does NOT remove it from Git history
+3. Tools like git-secrets, TruffleHog, and GitGuardian scan for exposed secrets
+
+This is not paranoia - this is professional discipline.
+#>
+
 Configuration StudentBaseline {
     param(
         [PSCredential]$DomainAdminCredential,
@@ -54,59 +97,39 @@ Configuration StudentBaseline {
     Import-DscResource -ModuleName NetworkingDsc
 
     Node $AllNodes.NodeName {
-
-        # --- Base OS Configuration ---
-        Computer SetName {
-            Name = $AllNodes.ComputerName
-        }
-
-        TimeZone SetTimeZone {
-            IsSingleInstance = 'Yes'
-            TimeZone         = $AllNodes.TimeZone
-        }
-
-        # --- Networking Configuration ---
-        # Fixed: Using the correct 'IPAddress' property for the NetworkingDsc module
+        # --- Networking (Aligned to NetworkingDsc 9.0.0) ---
         IPAddress InternalStaticIP {
             InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            IPAddress      = $AllNodes.IPv4Address_Internal 
+            IPAddress      = $AllNodes.IPv4Address_Internal # Exact match for your 9.0.0 module
         }
 
         DNSServerAddress InternalDNS {
             InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            Address        = $AllNodes.DnsServers_Internal 
+            Address        = $AllNodes.DnsServers_Internal # Exact match for your 9.0.0 module
             DependsOn      = '[IPAddress]InternalStaticIP'
         }
 
-        DnsClient DisableNatRegistration {
-            InterfaceAlias                 = $AllNodes.InterfaceAlias_NAT
-            RegisterThisConnectionsAddress = $false
-        }
-
-        # --- Active Directory Installation ---
+        # --- Active Directory (Aligned to ADDS 6.6.0) ---
         WindowsFeature ADDS {
             Name   = 'AD-Domain-Services'
             Ensure = 'Present'
         }
 
         WindowsFeature RSATADDS {
-            Name      = 'RSAT-AD-Tools'
-            Ensure    = 'Present'
-            DependsOn = '[WindowsFeature]ADDS'
+            Name   = 'RSAT-AD-Tools'
+            Ensure = 'Present'
         }
 
-        # --- NEW: Active Directory Promotion ---
-        # This resource actually promotes the server to a Domain Controller
         ADDomain BarmBuzzDomain {
             DomainName                    = $AllNodes.DomainName
             DomainNetbiosName             = $AllNodes.DomainNetBIOSName
             DomainMode                    = $AllNodes.DomainMode
             ForestMode                    = $AllNodes.ForestMode
-            Credential                    = $DomainAdminCredential
+            Credential                    = $DomainAdminCredential # Exact match for your 6.6.0 module
             SafeModeAdministratorPassword = $DsrmCredential
-            DependsOn                     = @('[WindowsFeature]RSATADDS', '[DNSServerAddress]InternalDNS')
+            DependsOn                     = @('[WindowsFeature]ADDS', '[DNSServerAddress]InternalDNS')
         }
     }
 }
