@@ -115,12 +115,16 @@ Configuration StudentBaseline {
         # --- FIX: Removed the DnsClient block that caused the Positional Parameter error ---
         # Manual registry fix to ensure NAT NIC doesn't register in AD DNS. 
         # This replaces the DnsClient resource and satisfies the Pester test.
+        # --- FIX: The Registry Key path requires a simpler string format to avoid the Positional Parameter error ---
         Registry DisableNatDnsRegistration {
-            Key       = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\$($AllNodes.InterfaceAlias_NAT)"
+            # Use a variable to store the path first, or use simple concatenation
+            Key       = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\$($Node.InterfaceAlias_NAT)"
             ValueName = 'RegistrationEnabled'
             ValueData = '0'
             ValueType = 'Dword'
             Ensure    = 'Present'
+            # Added a dependency to networking so it doesn't run before the NIC is ready
+            DependsOn = '[DNSServerAddress]InternalDNS' 
         }
 
         # --- Active Directory (Aligned to ADDS 6.6.0) ---
@@ -136,33 +140,37 @@ Configuration StudentBaseline {
             DependsOn = '[WindowsFeature]ADDS'
         }
 
+        # --- Active Directory ---
+        # Ensure you are using the PSCredential objects passed in the Param block
         ADDomain BarmBuzzDomain {
-            DomainName                    = $AllNodes.DomainName
-            DomainNetbiosName             = $AllNodes.DomainNetBIOSName
-            DomainMode                    = $AllNodes.DomainMode
-            ForestMode                    = $AllNodes.ForestMode
+            DomainName                    = $Node.DomainName
+            DomainNetbiosName             = $Node.DomainNetBIOSName
+            DomainMode                    = $Node.DomainMode
+            ForestMode                    = $Node.ForestMode
+            # Ensure these match your param() block exactly
             Credential                    = $DomainAdminCredential 
             SafeModeAdministratorPassword = $DsrmCredential
             DependsOn                     = @('[WindowsFeature]RSATADDS', '[DNSServerAddress]InternalDNS')
         }
 
         # --- Organizational Units (Standard Security Structure) ---
-        ADOrganizationalUnit GroupsOU {
-            Name       = 'Groups'
+        # --- Organizational Units (Avoids conflicts with default system containers) ---
+        ADOrganizationalUnit BarmBuzzGroups {
+            Name       = 'BB_Groups'
             Path       = "DC=barmbuzz,DC=local"
             DependsOn  = '[ADDomain]BarmBuzzDomain'
             Ensure     = 'Present'
         }
 
-        ADOrganizationalUnit UsersOU {
-            Name       = 'Users'
+        ADOrganizationalUnit BarmBuzzUsers {
+            Name       = 'BB_Users'
             Path       = "DC=barmbuzz,DC=local"
             DependsOn  = '[ADDomain]BarmBuzzDomain'
             Ensure     = 'Present'
         }
 
-        ADOrganizationalUnit ComputersOU {
-            Name       = 'Computers'
+        ADOrganizationalUnit BarmBuzzComputers {
+            Name       = 'BB_Computers'
             Path       = "DC=barmbuzz,DC=local"
             DependsOn  = '[ADDomain]BarmBuzzDomain'
             Ensure     = 'Present'
