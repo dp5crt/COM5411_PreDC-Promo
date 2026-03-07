@@ -153,27 +153,136 @@ Configuration StudentBaseline {
             DependsOn                     = @('[WindowsFeature]RSATADDS', '[DNSServerAddress]InternalDNS')
         }
 
-        # --- Organizational Units (Standard Security Structure) ---
-        # --- Organizational Units (Avoids conflicts with default system containers) ---
-        ADOrganizationalUnit BarmBuzzGroups {
-            Name       = 'BB_Groups'
-            Path       = "DC=barmbuzz,DC=local"
-            DependsOn  = '[ADDomain]BarmBuzzDomain'
-            Ensure     = 'Present'
+        # --- 1. ENTERPRISE ROOT ---
+        ADOrganizationalUnit BarmBuzzRoot {
+            Name                           = 'BarmBuzz'
+            Path                           = "DC=barmbuzz,DC=local"
+            Description                    = 'BarmBuzz enterprise root - the foundation of the logical forest structure.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADDomain]BarmBuzzDomain'
+            Ensure                         = 'Present'
         }
 
-        ADOrganizationalUnit BarmBuzzUsers {
-            Name       = 'BB_Users'
-            Path       = "DC=barmbuzz,DC=local"
-            DependsOn  = '[ADDomain]BarmBuzzDomain'
-            Ensure     = 'Present'
+        # --- 2. TIER 0 (CONTROL PLANE) ---
+        ADOrganizationalUnit Tier0 {
+            Name                           = 'Tier0'
+            Path                           = "OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Domain control plane - restricted access for high-privilege assets.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BarmBuzzRoot'
+            Ensure                         = 'Present'
         }
 
-        ADOrganizationalUnit BarmBuzzComputers {
-            Name       = 'BB_Computers'
-            Path       = "DC=barmbuzz,DC=local"
-            DependsOn  = '[ADDomain]BarmBuzzDomain'
-            Ensure     = 'Present'
+        ADOrganizationalUnit Tier0Admins {
+            Name                           = 'Admins'
+            Path                           = "OU=Tier0,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Domain administrator accounts - Tier 0 personnel only.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Tier0'
+            Ensure                         = 'Present'
+        }
+
+        # --- 3. SITES & REGIONAL (BOLTON HQ) ---
+        ADOrganizationalUnit Sites {
+            Name                           = 'Sites'
+            Path                           = "OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Geographic site containers for regional resource management.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BarmBuzzRoot'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit Bolton {
+            Name                           = 'Bolton'
+            Path                           = "OU=Sites,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Bolton HQ - The spiritual and technical root of the enterprise.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Sites'
+            Ensure                         = 'Present'
+        }
+
+        # --- 4. ENDPOINTS (POS, WORKSTATIONS, KIOSKS) ---
+        ADOrganizationalUnit BoltonComputers {
+            Name                           = 'Computers'
+            Path                           = "OU=Bolton,OU=Sites,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Bolton computer accounts for workstations and specialized terminals.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Bolton'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit BoltonPOS {
+            Name                           = 'POS'
+            Path                           = "OU=Computers,OU=Bolton,OU=Sites,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'POS terminals at Barm Unloading Bay - critical retail endpoints.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BoltonComputers'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit BoltonKiosks {
+            Name                           = 'Kiosks'
+            Path                           = "OU=Computers,OU=Bolton,OU=Sites,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Self-service ordering kiosks - automated customer touchpoints.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BoltonComputers'
+            Ensure                         = 'Present'
+        }
+
+        # --- 5. GROUPS (Security and Distribution Containers) ---
+        ADOrganizationalUnit Groups {
+            Name                           = 'Groups'
+            Path                           = "OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Security and distribution group containers for centralized access control.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BarmBuzzRoot'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit GroupsRole {
+            Name                           = 'Role'
+            Path                           = "OU=Groups,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Global role groups (AGDLP: G layer) representing job functions.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Groups'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit GroupsResource {
+            Name                           = 'Resource'
+            Path                           = "OU=Groups,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Domain local resource groups (AGDLP: DL layer) for ACL assignments.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Groups'
+            Ensure                         = 'Present'
+        }
+
+        # --- 6. CLIENTS (Domain-Joined Endpoints by OS) ---
+        ADOrganizationalUnit Clients {
+            Name                           = 'Clients'
+            Path                           = "OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Domain-joined client machines categorized by operating system.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]BarmBuzzRoot'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit ClientsWindows {
+            Name                           = 'Windows'
+            Path                           = "OU=Clients,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Windows domain-joined client endpoints.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Clients'
+            Ensure                         = 'Present'
+        }
+
+        ADOrganizationalUnit ClientsLinux {
+            Name                           = 'Linux'
+            Path                           = "OU=Clients,OU=BarmBuzz,DC=barmbuzz,DC=local"
+            Description                    = 'Linux domain-joined client endpoints.'
+            ProtectedFromAccidentalDeletion = $true
+            DependsOn                      = '[ADOrganizationalUnit]Clients'
+            Ensure                         = 'Present'
         }
     }
 }

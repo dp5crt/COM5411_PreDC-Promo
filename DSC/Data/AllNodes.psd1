@@ -66,6 +66,12 @@ This is not just a rule - this is professional survival.
             InterfaceAlias_NAT          = 'Ethernet'
             Expect_NAT_Dhcp             = $true
             DisableDnsRegistrationOnNat = $true
+
+            # --- OU Metadata (Stored here for easy editing) ---
+            EnterpriseRootName          = 'BarmBuzz'
+            RootDescription             = 'BarmBuzz enterprise root - foundation of the logical forest.'
+            BoltonDescription           = 'Bolton HQ - The technical root of the enterprise.'
+            Tier0Description            = 'Domain control plane - restricted access.'
             
             # Installation Flags
             InstallADDSRole = $true
