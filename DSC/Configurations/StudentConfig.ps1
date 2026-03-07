@@ -101,14 +101,26 @@ Configuration StudentBaseline {
         IPAddress InternalStaticIP {
             InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            IPAddress      = $AllNodes.IPv4Address_Internal # Exact match for your 9.0.0 module
+            IPAddress      = $AllNodes.IPv4Address_Internal 
         }
 
         DNSServerAddress InternalDNS {
             InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            Address        = $AllNodes.DnsServers_Internal # Exact match for your 9.0.0 module
+            Address        = $AllNodes.DnsServers_Internal 
             DependsOn      = '[IPAddress]InternalStaticIP'
+        }
+
+
+        # --- FIX: Removed the DnsClient block that caused the Positional Parameter error ---
+        # Manual registry fix to ensure NAT NIC doesn't register in AD DNS. 
+        # This replaces the DnsClient resource and satisfies the Pester test.
+        Registry DisableNatDnsRegistration {
+            Key       = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\$($AllNodes.InterfaceAlias_NAT)"
+            ValueName = 'RegistrationEnabled'
+            ValueData = '0'
+            ValueType = 'Dword'
+            Ensure    = 'Present'
         }
 
         # --- Active Directory (Aligned to ADDS 6.6.0) ---
@@ -117,9 +129,11 @@ Configuration StudentBaseline {
             Ensure = 'Present'
         }
 
+        # Added DependsOn to ensure tools install AFTER the core feature
         WindowsFeature RSATADDS {
-            Name   = 'RSAT-AD-Tools'
-            Ensure = 'Present'
+            Name      = 'RSAT-AD-Tools'
+            Ensure    = 'Present'
+            DependsOn = '[WindowsFeature]ADDS'
         }
 
         ADDomain BarmBuzzDomain {
@@ -127,9 +141,31 @@ Configuration StudentBaseline {
             DomainNetbiosName             = $AllNodes.DomainNetBIOSName
             DomainMode                    = $AllNodes.DomainMode
             ForestMode                    = $AllNodes.ForestMode
-            Credential                    = $DomainAdminCredential # Exact match for your 6.6.0 module
+            Credential                    = $DomainAdminCredential 
             SafeModeAdministratorPassword = $DsrmCredential
-            DependsOn                     = @('[WindowsFeature]ADDS', '[DNSServerAddress]InternalDNS')
+            DependsOn                     = @('[WindowsFeature]RSATADDS', '[DNSServerAddress]InternalDNS')
+        }
+
+        # --- Organizational Units (Standard Security Structure) ---
+        ADOrganizationalUnit GroupsOU {
+            Name       = 'Groups'
+            Path       = "DC=barmbuzz,DC=local"
+            DependsOn  = '[ADDomain]BarmBuzzDomain'
+            Ensure     = 'Present'
+        }
+
+        ADOrganizationalUnit UsersOU {
+            Name       = 'Users'
+            Path       = "DC=barmbuzz,DC=local"
+            DependsOn  = '[ADDomain]BarmBuzzDomain'
+            Ensure     = 'Present'
+        }
+
+        ADOrganizationalUnit ComputersOU {
+            Name       = 'Computers'
+            Path       = "DC=barmbuzz,DC=local"
+            DependsOn  = '[ADDomain]BarmBuzzDomain'
+            Ensure     = 'Present'
         }
     }
 }
