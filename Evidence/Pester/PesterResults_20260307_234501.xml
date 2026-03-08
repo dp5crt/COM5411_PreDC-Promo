@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="7" errors="0" failures="1" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-03-07" time="23:45:01">
+  <environment machine-name="BB-DC01" user="Administrator" nunit-version="2.5.8.0" cwd="C:\Dev\repos\COM5411_PreDC-Promo" os-version="10.0.26100" platform="Microsoft Windows Server 2025 Datacenter|C:\WINDOWS|\Device\Harddisk0\Partition2" clr-version="9.0.10" user-domain="BARMBUZZ" />
+  <culture-info current-culture="en-GB" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Failure" success="False" time="2.1767" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\Dev\repos\COM5411_PreDC-Promo\Tests\Pester\Infrastructure.Tests.ps1" executed="True" result="Failure" success="False" time="2.1767" asserts="0" description="C:\Dev\repos\COM5411_PreDC-Promo\Tests\Pester\Infrastructure.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="BarmBuzz AD Infrastructure Baseline" executed="True" result="Failure" success="False" time="0.9709" asserts="0" description="BarmBuzz AD Infrastructure Baseline">
+            <results>
+              <test-suite type="TestFixture" name="BarmBuzz AD Infrastructure Baseline.DNS Configuration" executed="True" result="Success" success="True" time="0.243" asserts="0" description="BarmBuzz AD Infrastructure Baseline.DNS Configuration">
+                <results>
+                  <test-case description="Should NOT have the 10.0.2.15 NAT IP registered for the domain root" name="BarmBuzz AD Infrastructure Baseline.DNS Configuration.Should NOT have the 10.0.2.15 NAT IP registered for the domain root" time="0.1822" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should resolve barmbuzz.local to the internal IP 192.168.99.10" name="BarmBuzz AD Infrastructure Baseline.DNS Configuration.Should resolve barmbuzz.local to the internal IP 192.168.99.10" time="0.0292" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy" executed="True" result="Failure" success="False" time="0.8662" asserts="0" description="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy">
+                <results>
+                  <test-case description="Should have a 'BarmBuzz' Enterprise Root OU" name="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy.Should have a 'BarmBuzz' Enterprise Root OU" time="0.2362" asserts="0" success="False" result="Failure" executed="True">
+                    <failure>
+                      <message>RuntimeException: The variable '$OUs' cannot be retrieved because it has not been set.</message>
+                      <stack-trace>at &lt;ScriptBlock&gt;, C:\Dev\repos\COM5411_PreDC-Promo\Tests\Pester\Infrastructure.Tests.ps1:20</stack-trace>
+                    </failure>
+                  </test-case>
+                  <test-case description="Should protect the 'BarmBuzz' OU from accidental deletion" name="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy.Should protect the 'BarmBuzz' OU from accidental deletion" time="0.3075" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should have a 'Tier0' OU nested under 'BarmBuzz'" name="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy.Should have a 'Tier0' OU nested under 'BarmBuzz'" time="0.0417" asserts="0" success="True" result="Success" executed="True" />
+                  <test-case description="Should have a 'Bolton' Site OU nested under 'Sites'" name="BarmBuzz AD Infrastructure Baseline.Organizational Unit Hierarchy.Should have a 'Bolton' Site OU nested under 'Sites'" time="0.0337" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+              <test-suite type="TestFixture" name="BarmBuzz AD Infrastructure Baseline.AGDLP Security Groups" executed="True" result="Success" success="True" time="0.9082" asserts="0" description="BarmBuzz AD Infrastructure Baseline.AGDLP Security Groups">
+                <results>
+                  <test-case description="Should have a 'Role' OU for job functions" name="BarmBuzz AD Infrastructure Baseline.AGDLP Security Groups.Should have a 'Role' OU for job functions" time="0.0376" asserts="0" success="True" result="Success" executed="True" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

@@ -1,0 +1,61 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260305224832
+Username: BB-DC01\Administrator
+RunAs User: BB-DC01\Administrator
+Configuration Name: 
+Machine: BB-DC01 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 4268
+PSVersion: 5.1.26100.1591
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.1591
+BuildVersion: 10.0.26100.1591
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+[+] Transcript started: Evidence\\Transcripts\\20260305_224832_Run_BuildMain.txt
+[+] Admin privileges confirmed.
+
+[Phase 1] Prerequisites...
+[*] Invoke-BarmBuzz-OneShots: LCM then Network
+[*] LCM already configured (flag present).
+[*] Network already configured (flag present).
+[*] LCM already configured (skipping).
+[*] Network already configured (skipping).
+[+] Phase 1 complete.
+[+] Credentials loaded (hardcoded lab mode *** see warning in comments above ***).
+
+[Phase 2] Compile + Apply DSC...
+[*] Compiling -> DSC\\Outputs\\StudentBaseline
+[*] Compiling via Windows PowerShell 5.1 (GroupPolicyDsc requires it)...
+PSDesiredStateConfiguration\Node : A positional parameter cannot be found that accepts argument '
+            InterfaceAlias                 = $AllNodes.InterfaceAlias_NAT
+            RegisterThisConnectionsAddress = $false
+            DependsOn                      = '[DNSServerAddress]InternalDNS'
+        '.
+At C:\Dev\repos\COM5411_PreDC-Promo\DSC\Configurations\StudentConfig.ps1:99 char:5
++     Node $AllNodes.NodeName {
++     ~~~~
+    + CategoryInfo          : InvalidArgument: (:) [PSDesiredStateConfiguration\node], ParentContain
+   sErrorRecordException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,PSDesiredStateConfiguration\node
+
+Compilation errors occurred while processing configuration 'StudentBaseline'. Please review the
+errors reported in error stream and modify your configuration code appropriately.
+At C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PSDesiredStateConfi
+guration.psm1:3917 char:5
++     throw $ErrorRecord
++     ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (StudentBaseline:String) [], InvalidOperationExcepti
+   on
+    + FullyQualifiedErrorId : FailToProcessConfiguration
+
+[-] BUILD FAILED
+Message: MOF compilation failed in PS5.1 (exit code 1). Check StudentConfig.ps1 and AllNodes.psd1.
+**********************
+Windows PowerShell transcript end
+End time: 20260305224836
+**********************
