@@ -72,7 +72,8 @@ This is not just a rule - this is professional survival.
             RootDescription             = 'BarmBuzz enterprise root - foundation of the logical forest.'
             BoltonDescription           = 'Bolton HQ - The technical root of the enterprise.'
             Tier0Description            = 'Domain control plane - restricted access.'
-            
+            SiteName           = 'Bolton'
+
             # Installation Flags
             InstallADDSRole = $true
             InstallRSATADDS = $true
